@@ -73,21 +73,35 @@ def click_loop():
 def perform_click_sequence():
     global click_count
     try:
-        click("Ugly Duckling", 1698, random.randint(802, 812))  # Click on "Ugly Duckling"
-        time.sleep(POST_CLICK_DELAY)  # Wait for the post-click delay
-        click("Pineappletini", 1698, random.randint(840, 850))  # Click on "Pineappletini"
-        time.sleep(POST_CLICK_DELAY)  # Wait for the post-click delay
+        # click("Palmer Farmer", 1698, random.randint(802, 812))  # Click on "Palmer Farmer"
+        # time.sleep(POST_CLICK_DELAY)  # Wait for the post-click delay
+        # click("Pineappletini", 1698, random.randint(840, 850))  # Click on "Pineappletini"
+        # time.sleep(POST_CLICK_DELAY)  # Wait for the post-click delay
 
-        # Calculate the end time for the 15-minute interval
-        end_time = time.time() + 14 * 60 + random.randint(10, 20)
+        # Calculate the end time for the 14-minute interval
+        end_time = time.time() + 13 * 60 + random.randint(10, 20)
         logging.info(f"End time set to {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}")
+
+        # Start a separate thread for pressing the "1" key
+        def press_key_loop(end_time):
+            while time.time() < end_time:
+                with lock:
+                    if not running:
+                        logging.info("Script is not running. Exiting 1 key press loop.")
+                        return  # Exit the loop if the script is not running
+                pyautogui.press('1')  # Press the "1" key
+                logging.info("Pressing '1' key.")
+                time.sleep(2)  # Wait for 2 seconds
+
+        key_press_thread = threading.Thread(target=press_key_loop, args=(end_time,))
+        key_press_thread.start()
 
         while time.time() < end_time:
             with lock:
                 if not running:
                     logging.info("Script is not running. Exiting click sequence.")
                     return  # Exit the loop if the script is not running
-            click("Hook-a-duck", 860 + random.randint(-1, 1), 495 + random.randint(-1, 1))  # Click on "Hook-a-duck"
+            click("Palm Tree", random.randint(815, 850), random.randint(375, 430))  # Click on "Palm Tree"
             interval = random.uniform(CLICK_INTERVAL_MIN, CLICK_INTERVAL_MAX)
             time.sleep(interval)  # Wait for a random interval between clicks
             time.sleep(POST_CLICK_DELAY)  # Wait for the post-click delay
@@ -103,40 +117,6 @@ def click(description, x, y):
     pyautogui.click()  # Perform a mouse click
     click_count += 1  # Increment the click count
     logging.info(f"Clicked {description}. Total clicks: {click_count}")
-
-def determine_next_move(last_move):
-    try:
-        logging.info(f"Determining next move from last move: {last_move}")
-        if last_move == 'right':
-            x_move = random.randint(-2, 0)  # Move left or stay
-            y_move = random.randint(-2, 2)  # Move up or down
-        elif last_move == 'left':
-            x_move = random.randint(0, 2)  # Move right or stay
-            y_move = random.randint(-2, 2)  # Move up or down
-        elif last_move == 'up':
-            x_move = random.randint(-2, 2)  # Move left or right
-            y_move = random.randint(0, 2)  # Move down or stay
-        elif last_move == 'down':
-            x_move = random.randint(-2, 2)  # Move left or right
-            y_move = random.randint(-2, 0)  # Move up or stay
-        else:
-            x_move = random.randint(-2, 2)  # Move left or right
-            y_move = random.randint(-2, 2)  # Move up or down
-
-        if x_move > 0:
-            last_move = 'right'  # Update last move to right
-        elif x_move < 0:
-            last_move = 'left'  # Update last move to left
-        if y_move > 0:
-            last_move = 'down'  # Update last move to down
-        elif y_move < 0:
-            last_move = 'up'  # Update last move to up
-
-        logging.info(f"Next move: x_move={x_move}, y_move={y_move}, last_move={last_move}")
-        return x_move, y_move, last_move  # Return the next move and updated last move
-    except Exception as e:
-        logging.error(f"Error in determine_next_move: {e}")
-        return 0, 0, last_move  # Return no move if an error occurs
 
 try:
     with Listener(on_press=on_press) as listener:  # Start the keyboard listener
